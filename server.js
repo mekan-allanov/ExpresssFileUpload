@@ -1,0 +1,39 @@
+import cors from "cors";
+import dotenv from "dotenv";
+import express from "express";
+import sequelize from "./src/config/db.js";
+import fileRoutes from "./src/routes/fileRoutes.js";
+import userRoutes from "./src/routes/userRoutes.js";
+
+dotenv.config();
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+
+// Routes
+app.use("/api", userRoutes);
+app.use("/api", fileRoutes);
+
+// Sync all models with the database
+const syncDatabase = async () => {
+	try {
+		await sequelize.sync({ force: false }); // Use { force: true } to drop existing tables
+		console.log("All models were synchronized successfully.");
+	} catch (error) {
+		console.error("Error synchronizing models:", error);
+	}
+};
+
+// Sync the database
+syncDatabase();
+
+// Start the server
+app.listen(PORT, () => {
+	console.log(`Server is running on http://localhost:${PORT}`);
+});
+
+export default app;
