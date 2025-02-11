@@ -9,10 +9,10 @@ import { isValidEmail, isValidPassword, isValidUsername } from "../utils/validat
 // Sign up a new user
 export const signup = async (req, res) => {
 	try {
-		const { id, email, password } = req.body;
+		const { email, password, username } = req.body;
 
 		// Validate required fields
-		if (!id || !email || !password) return res.status(400).json({ message: "All fields are required" });
+		if (!email || !password || !username) return res.status(400).json({ message: "All fields are required" });
 
 		// Validate email format
 		if (!isValidEmail(email)) return res.status(400).json({ message: "Invalid email format" });
@@ -20,22 +20,22 @@ export const signup = async (req, res) => {
 		// Validate password strength
 		if (!isValidPassword(password))
 			return res.status(400).json({
-				message: "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character",
+				message: "Password must be at least 6 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character",
 			});
 
 		// Validate username format
-		if (!isValidUsername(id))
+		if (!isValidUsername(username))
 			return res.status(400).json({
 				message: "Username must be 3-30 characters long and can only contain letters, numbers, and underscores",
 			});
 
 		// Check for existing user by username or email
-		const existingUser = await User.findOne({ where: { [Op.or]: [{ id }, { email }] } });
+		const existingUser = await User.findOne({ where: { [Op.or]: [{ username }, { email }] } });
 		if (existingUser) return res.status(400).json({ message: "Username or email already exists" });
 
 		// Hash the password before saving
 		const hashedPassword = await bcrypt.hash(password, 10);
-		const user = await User.create({ id, email, password: hashedPassword });
+		const user = await User.create({ username, email, password: hashedPassword });
 
 		// Generate access and refresh tokens
 		const { accessToken, refreshToken } = generateTokens({ id: user.id });
@@ -60,14 +60,14 @@ export const signup = async (req, res) => {
 // Sign in an existing user
 export const signin = async (req, res) => {
 	try {
-		const { id, password } = req.body;
+		const { email, password } = req.body;
 		const deviceInfo = req.headers["user-agent"] || null;
 
 		// Validate required fields
-		if (!id || !password) return res.status(400).json({ message: "All fields are required" });
+		if (!email || !password) return res.status(400).json({ message: "All fields are required" });
 
 		// Find user by id
-		const user = await User.findOne({ where: { id } });
+		const user = await User.findOne({ where: { email } });
 		if (!user) return res.status(400).json({ message: "User not found" });
 
 		// Verify the password
@@ -132,17 +132,21 @@ export const refreshToken = async (req, res) => {
 // Get user information
 export const getUserInfo = async (req, res) => {
 	try {
+		// Retrieve the user ID from the request object, which is set by the authentication middleware
+		const userId = req.user.id;
+
 		// Find the user by ID from the token
-		const user = await User.findByPk(req.user.id, {
-			attributes: ["id"],
+		const user = await User.findByPk(userId, {
+			attributes: ["id", "email", "username"],
 		});
 
 		if (!user) return res.status(404).json({ message: "User not found" });
 
 		// Respond with user information
-		return res.json({ id: user.id });
+		return res.json(user);
 	} catch (error) {
 		console.error(error);
+		// Handle any errors that occur during the user information retrieval process
 		return res.status(500).json({ message: "Error fetching user information" });
 	}
 };

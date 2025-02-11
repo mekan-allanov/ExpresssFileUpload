@@ -1,5 +1,5 @@
 import { DataTypes } from "sequelize";
-import sequelize from "../config/db.js";
+import sequelize from "../config/db.config.js";
 import User from "./User.js";
 
 const Token = sequelize.define(
@@ -9,10 +9,6 @@ const Token = sequelize.define(
 			type: DataTypes.INTEGER,
 			primaryKey: true,
 			autoIncrement: true,
-		},
-		userId: {
-			type: DataTypes.STRING,
-			allowNull: false,
 		},
 		token: {
 			type: DataTypes.STRING,
@@ -33,14 +29,19 @@ const Token = sequelize.define(
 			type: DataTypes.STRING,
 			allowNull: true,
 		},
+		userId: {
+			type: DataTypes.INTEGER,
+			allowNull: false,
+			references: {
+				model: User,
+				key: "id",
+			},
+		},
 	},
 	{
 		tableName: "tokens",
 		timestamps: true,
 	}
 );
-
-Token.belongsTo(User, { foreignKey: "userId" });
-User.hasMany(Token, { foreignKey: "userId" });
 
 export default Token;

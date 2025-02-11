@@ -1,7 +1,7 @@
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
-import sequelize from "./src/config/db.js";
+import sequelize from "./src/config/db.config.js";
 import fileRoutes from "./src/routes/fileRoutes.js";
 import userRoutes from "./src/routes/userRoutes.js";
 
@@ -21,10 +21,10 @@ app.use("/api", fileRoutes);
 // Sync all models with the database
 const syncDatabase = async () => {
 	try {
-		await sequelize.sync({ force: false }); // Use { force: true } to drop existing tables
-		console.log("All models were synchronized successfully.");
+		await sequelize.sync({ force: true }); // Use { force: true } to drop existing tables
+		console.log("Database synchronized successfully.");
 	} catch (error) {
-		console.error("Error synchronizing models:", error);
+		console.error("Error synchronizing database:", error);
 	}
 };
 

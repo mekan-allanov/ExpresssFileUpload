@@ -1,5 +1,5 @@
 import { DataTypes } from "sequelize";
-import sequelize from "../config/db.js";
+import sequelize from "../config/db.config.js";
 import User from "./User.js";
 
 const File = sequelize.define(
@@ -32,20 +32,18 @@ const File = sequelize.define(
 			allowNull: false,
 		},
 		userId: {
-			type: DataTypes.STRING,
+			type: DataTypes.INTEGER,
+			allowNull: false,
 			references: {
 				model: User,
 				key: "id",
 			},
-			allowNull: false,
 		},
 	},
 	{
 		tableName: "files",
+		timestamps: true, // Add timestamps for createdAt and updatedAt
 	}
 );
-
-File.belongsTo(User, { foreignKey: "userId" });
-User.hasMany(File, { foreignKey: "userId" });
 
 export default File;
