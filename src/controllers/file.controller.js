@@ -1,15 +1,20 @@
 import fs from "fs";
 import path from "path";
+import { ApiError } from "../middleware/error.middleware.js";
 import File from "../models/File.js";
 
 // Upload a file
-export const uploadFile = async (req, res) => {
+export const uploadFile = async (req, res, next) => {
 	try {
 		// Check for file validation errors
-		if (req.fileValidationError) return res.status(400).json({ message: req.fileValidationError });
+		if (req.fileValidationError) {
+			throw new ApiError(400, req.fileValidationError);
+		}
 
 		// Ensure a file is uploaded
-		if (!req.file) return res.status(400).json({ message: "Please upload a file" });
+		if (!req.file) {
+			throw new ApiError(400, "Please upload a file");
+		}
 
 		// Extract file details
 		const { filename, mimetype, size } = req.file;
@@ -32,12 +37,12 @@ export const uploadFile = async (req, res) => {
 	} catch (error) {
 		console.error(error);
 		// Handle any errors that occur during the upload process
-		res.status(500).json({ message: "Error uploading file" });
+		next(error);
 	}
 };
 
 // List all files for the authenticated user
-export const listFiles = async (req, res) => {
+export const listFiles = async (req, res, next) => {
 	try {
 		// Get pagination parameters from the query
 		const page = Number(req.query.page) || 1; // Default to page 1
@@ -56,12 +61,12 @@ export const listFiles = async (req, res) => {
 	} catch (error) {
 		console.error(error);
 		// Handle any errors that occur during the file listing process
-		res.status(500).json({ message: "Error fetching files" });
+		next(error);
 	}
 };
 
 // Delete a specific file by ID
-export const deleteFile = async (req, res) => {
+export const deleteFile = async (req, res, next) => {
 	try {
 		// Find the file in the database
 		const file = await File.findOne({
@@ -69,7 +74,7 @@ export const deleteFile = async (req, res) => {
 		});
 
 		// If the file is not found, respond with a 404 error
-		if (!file) return res.status(404).json({ message: "File not found" });
+		if (!file) throw new ApiError(404, "File not found");
 
 		// Construct the file path for deletion
 		const filePath = path.join(process.cwd(), "uploads", `${file.get("name")}${file.get("extension")}`);
@@ -81,12 +86,12 @@ export const deleteFile = async (req, res) => {
 	} catch (error) {
 		console.error(error);
 		// Handle any errors that occur during the file deletion process
-		res.status(500).json({ message: "Error deleting file" });
+		next(error);
 	}
 };
 
 // Get a specific file by ID
-export const getFile = async (req, res) => {
+export const getFile = async (req, res, next) => {
 	try {
 		// Find the file in the database
 		const file = await File.findOne({
@@ -94,19 +99,19 @@ export const getFile = async (req, res) => {
 		});
 
 		// If the file is not found, respond with a 404 error
-		if (!file) return res.status(404).json({ message: "File not found" });
+		if (!file) throw new ApiError(404, "File not found");
 
 		// Respond with the file details
 		res.json(file);
 	} catch (error) {
 		console.error(error);
 		// Handle any errors that occur during the file retrieval process
-		res.status(500).json({ message: "Error fetching file information" });
+		next(error);
 	}
 };
 
 // Download a specific file by ID
-export const downloadFile = async (req, res) => {
+export const downloadFile = async (req, res, next) => {
 	try {
 		// Find the file in the database
 		const file = await File.findOne({
@@ -114,7 +119,7 @@ export const downloadFile = async (req, res) => {
 		});
 
 		// If the file is not found, respond with a 404 error
-		if (!file) return res.status(404).json({ message: "File not found" });
+		if (!file) throw new ApiError(404, "File not found");
 
 		// Construct the file name and path for downloading
 		const fileName = `${file.get("name")}${file.get("extension")}`;
@@ -125,12 +130,12 @@ export const downloadFile = async (req, res) => {
 	} catch (error) {
 		console.error(error);
 		// Handle any errors that occur during the file download process
-		res.status(500).json({ message: "Error downloading file" });
+		next(error);
 	}
 };
 
 // Update a specific file by ID
-export const updateFile = async (req, res) => {
+export const updateFile = async (req, res, next) => {
 	try {
 		// Find the existing file in the database
 		const existingFile = await File.findOne({
@@ -138,13 +143,13 @@ export const updateFile = async (req, res) => {
 		});
 
 		// If the file is not found, respond with a 404 error
-		if (!existingFile) return res.status(404).json({ message: "File not found" });
+		if (!existingFile) throw new ApiError(404, "File not found");
 
 		// Check for file validation errors
-		if (req.fileValidationError) return res.status(400).json({ message: req.fileValidationError });
+		if (req.fileValidationError) throw new ApiError(400, req.fileValidationError);
 
 		// Ensure a new file is uploaded
-		if (!req.file) return res.status(400).json({ message: "Please upload a file" });
+		if (!req.file) throw new ApiError(400, "Please upload a file");
 
 		// Extract new file details
 		const { filename, mimetype, size } = req.file;
@@ -169,6 +174,6 @@ export const updateFile = async (req, res) => {
 	} catch (error) {
 		console.error(error);
 		// Handle any errors that occur during the file update process
-		res.status(500).json({ message: "Error updating file" });
+		next(error);
 	}
 };

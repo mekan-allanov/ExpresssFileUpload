@@ -4,8 +4,6 @@ package-lock.json
 
 # Environment variables
 .env
-.env.local  # If you have local overrides
-.env.example # Example file, but not the actual credentials
 
 # Logs
 logs/
@@ -19,8 +17,8 @@ temp/
 .DS_Store # macOS specific
 
 # Debugging and testing
-.vscode/launch.json  # If you have project-specific debug configurations
-.vscode/settings.json # If you have project-specific settings you don't want to share
+.vscode/launch.json
+.vscode/settings.json
 test/reports/
 coverage/
 

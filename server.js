@@ -2,8 +2,8 @@ import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
 import sequelize from "./src/config/db.config.js";
-import fileRoutes from "./src/routes/fileRoutes.js";
-import userRoutes from "./src/routes/userRoutes.js";
+import fileRoutes from "./src/routes/file.route.js";
+import userRoutes from "./src/routes/user.route.js";
 
 dotenv.config();
 
@@ -17,6 +17,9 @@ app.use(express.json());
 // Routes
 app.use("/api", userRoutes);
 app.use("/api", fileRoutes);
+
+// Error handling middleware (should be last)
+app.use(errorHandler);
 
 // Sync all models with the database
 const syncDatabase = async () => {

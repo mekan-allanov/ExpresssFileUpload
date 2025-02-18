@@ -1,13 +1,6 @@
 import express from "express";
-import {
-	getUserInfo,
-	logout,
-	logoutAll,
-	refreshToken,
-	signin,
-	signup,
-} from "../controllers/userController.js";
-import { authenticateToken } from "../middleware/auth.js";
+import { getUserInfo, logout, logoutAll, refreshToken, signin, signup } from "../controllers/user.controller.js";
+import { authenticateToken } from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 

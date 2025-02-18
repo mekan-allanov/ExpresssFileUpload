@@ -13,12 +13,12 @@ export const authenticateToken = async (req, res, next) => {
 			where: {
 				userId: user.id,
 				token: token,
-				status: "active", // Only allow active tokens
+				status: "active", // Only allow active tokensh
 			},
 		});
 
 		if (!tokenRecord) {
-			return res.sendStatus(403);
+			return res.sendStatus(403).json({ message: "Invalid token" });
 		}
 
 		req.user = user;
@@ -28,7 +28,7 @@ export const authenticateToken = async (req, res, next) => {
 		if (error.name === "TokenExpiredError") {
 			return res.status(401).json({ message: "Token expired" });
 		}
-		return res.sendStatus(403);
+		return res.sendStatus(403).json({ message: "Invalid token" });
 	}
 };
 
